@@ -1,169 +1,92 @@
-# BIO211 Coursework 3 – Palm skin metagenomic analysis
+<div align="center">
 
-This repository contains the R code, input tables and figures for my BIO211 Coursework 3 project on the palm skin microbiome.
+# City on the skin
 
----
+**A metagenomic view of palm microbiomes, cutotypes and urban chemical exposure**
 
-## Project overview
+[![Repository checks](https://github.com/Ci-yo/BIO211_CW3_Microbiome/actions/workflows/repository-check.yml/badge.svg)](https://github.com/Ci-yo/BIO211_CW3_Microbiome/actions/workflows/repository-check.yml)
+![R](https://img.shields.io/badge/analysis-R-276DC3?logo=r&logoColor=white)
+![Samples](https://img.shields.io/badge/samples-120-6B8E6E)
+![Resolution](https://img.shields.io/badge/taxonomy-species-8F6F4E)
+![Course](https://img.shields.io/badge/BIO211-CW3-4C566A)
 
-The dataset consists of **120 palm skin metagenomic samples** with:
+<img src="figures/Figure1_taxonomic_barplot.png" width="860" alt="Species-level composition across palm skin samples">
 
-- a **species-level count table** (`data/species_table.tsv`)
-- **sample metadata** including City, Cutotype and Age (`data/metadata.tsv`)
-- **pollutant measurements** for 15 PAHs plus Nicotine and Cotinine (`data/pollutant.tsv`)
+<sub>Each column is a palm sample; the stacked profile shows its dominant species-level community.</sub>
 
-The aim of the coursework was to:
+</div>
 
-1. Characterise **taxonomic composition** across **Cutotype 1 vs Cutotype 2**.
-2. Perform **multivariable association analysis** with MaAsLin3 (City, Cutotype, Age).
-3. Study **correlations between species abundance and pollutant levels** (Spearman, FDR).
-4. Analyse **alpha diversity** (rarefaction, Shannon, richness).
-5. Analyse **beta diversity** (Bray–Curtis, Jaccard, PCoA, PERMANOVA).
+## Project snapshot
 
-All analyses are implemented in a single, well-annotated R script so that the workflow can be reproduced from the processed input tables.
+This repository explores how **city**, **palm-skin cutotype**, **age** and a panel of **17 nicotine/PAH measurements** relate to species-level microbial profiles. The analysis joins three compact tables for 120 samples and follows the signal from community composition to alpha and beta diversity.
 
----
+| Layer | What is measured | Main output |
+|---|---|---|
+| Taxonomy | species abundance | community composition and dominant taxa |
+| Host/environment | city, cutotype, age | stratified abundance comparisons |
+| Exposure | nicotine, cotinine and 15 PAHs | exposure–taxon associations |
+| Diversity | richness, Shannon, Bray–Curtis, Jaccard | within- and between-sample structure |
 
-## Repository structure
+## Visual story
 
-```text
-BIO211_CW3/
-├─ BIO211_CW3.Rproj           # RStudio project
-│
-├─ R/
-│  └─ 01_taxonomy_alpha.R     # main analysis script (Tasks 1–4)
-│
-├─ data/
-│  ├─ metadata.tsv            # sample metadata
-│  ├─ pollutant.tsv           # pollutant concentrations (PAHs, Nicotine, Cotinine)
-│  └─ species_table.tsv       # species-level count table
-│
-├─ figures/                   # generated figures for the report
-   ├─ Figure1_taxonomic_barplot.png
-   ├─ Figure2_City_boxplots.png
-   ├─ Figure3_Cutotype_boxplots.png
-   ├─ Figure4_Age_scatter.png
-   ├─ Figure5_PAH_top5_scatter_city.png
-   ├─ Figure6_rarefaction_curve.png
-   ├─ Figure7_Shannon_by_Cutotype.png
-   ├─ Figure8_alpha_QQplots.png
-   ├─ Figure9_PCoA_BrayCutotype.png
-   └─ Figure10_PCoA_JaccardCutotype.png
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="figures/Figure2_City_boxplots.png" alt="Taxa abundance by city"><br><strong>Place</strong><br>City-stratified abundance patterns.</td>
+    <td width="50%" align="center"><img src="figures/Figure5_PAH_top5_scatter_city.png" alt="Top PAH associations by city"><br><strong>Exposure</strong><br>Top pollutant–taxon relationships, coloured by city.</td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><img src="figures/Figure7_Shannon_by_Cutotype.png" alt="Shannon diversity by cutotype"><br><strong>Within-sample diversity</strong><br>Shannon diversity across cutotypes.</td>
+    <td width="50%" align="center"><img src="figures/Figure9_PCoA_BrayCutotype.png" alt="Bray-Curtis PCoA by cutotype"><br><strong>Community separation</strong><br>Bray–Curtis ordination of sample composition.</td>
+  </tr>
+</table>
 
+## Analysis map
+
+```mermaid
+flowchart LR
+    A[Species table] --> D[Matched sample matrix]
+    B[Sample metadata] --> D
+    C[Exposure panel] --> D
+    D --> E[Composition]
+    D --> F[Alpha diversity]
+    D --> G[Beta diversity]
+    D --> H[Taxon associations]
+    E --> I[Visual evidence]
+    F --> I
+    G --> I
+    H --> I
 ```
 
----
+The complete analysis is in [`R/01_taxonomy_alpha.R`](R/01_taxonomy_alpha.R). It keeps sample identifiers aligned before testing or plotting and records the transformations used for composition and diversity analyses.
 
-## How to reproduce the analysis
+## Repository guide
 
-1. **Clone the repository**
+```text
+BIO211_CW3_Microbiome/
+├── R/                  analysis script
+├── data/               species, metadata and exposure tables
+├── figures/            ten publication-style result figures
+├── scripts/            dependency-free repository validation
+└── .github/workflows/  automated archive check
+```
 
-   ```bash
-   git clone https://github.com/<your-username>/BIO211_CW3.git
-   cd BIO211_CW3
-   ```
+## Reproduce
 
-2. **Open the R project**
+Open `BIO211_CW3.Rproj`, install the packages declared near the top of the analysis script, and run:
 
-   - Double-click `BIO211_CW3.Rproj` to open the project in RStudio.
+```r
+source("R/01_taxonomy_alpha.R")
+```
 
-3. **Install required R packages (first run only)**
+For a lightweight archive check that does not require R:
 
-   In R/RStudio:
+```bash
+python scripts/validate_repository.py
+```
 
-   ```r
-   install.packages(c(
-     "tidyverse",
-     "vegan",
-     "Maaslin3",
-     "viridis",
-     "RColorBrewer"
-   ))
-   ```
+## Scope
 
-4. **Run the main script**
+This is a compact, reproducible archive of a completed metagenomics study. The data are retained because they are small enough for Git and necessary to reproduce the figures; temporary RStudio state and bulky intermediate objects are excluded.
 
-   - Open `R/01_taxonomy_alpha.R`.
-   - Source the script from top to bottom (`Ctrl+Shift+Enter` in RStudio)  
-     to:
-     - import the three `data/*.tsv` files,
-     - perform taxonomic, association, correlation, alpha- and beta-diversity analyses,
-     - write all figures to the `figures/` folder.
-
-The figures in `figures/` match those referenced in the coursework report (`report/BIO211_CW3_report.pdf`).
-
----
-
-## Figures
-
-### Taxonomic composition and MaAsLin3 associations
-
-**Figure 1 – Taxonomic composition across cutotypes**  
-Stacked bar plot of species-level relative abundance across samples, faceted by cutotype.
-
-![Figure 1](figures/Figure1_taxonomic_barplot.png)
-
-**Figure 2 – City associations (MaAsLin3)**  
-Boxplots of species strongly associated with City (Baoding vs Dalian).
-
-![Figure 2](figures/Figure2_City_boxplots.png)
-
-**Figure 3 – Cutotype associations (MaAsLin3)**  
-Boxplots of key Cutotype-associated species.
-
-![Figure 3](figures/Figure3_Cutotype_boxplots.png)
-
-**Figure 4 – Age associations (MaAsLin3)**  
-Scatter plots of age-associated species with regression lines.
-
-![Figure 4](figures/Figure4_Age_scatter.png)
-
----
-
-### Pollutant correlations
-
-**Figure 5 – Five strongest species–PAH associations**  
-Scatter plots of species relative abundance vs PAH concentration for the five lowest FDR-corrected q-values.
-
-![Figure 5](figures/Figure5_PAH_top5_scatter_city.png)
-
----
-
-### Alpha diversity
-
-**Figure 6 – Rarefaction curves of Shannon diversity**  
-Sample-wise Shannon diversity vs sequencing depth, coloured by cutotype.
-
-![Figure 6](figures/Figure6_rarefaction_curve.png)
-
-**Figure 7 – Shannon diversity across cutotypes**  
-Violin + boxplot of Shannon diversity for Cutotype 1 vs Cutotype 2.
-
-![Figure 7](figures/Figure7_Shannon_by_Cutotype.png)
-
-**Figure 8 – Q–Q plots of alpha-diversity metrics**  
-Normal Q–Q plots for evenness, richness and Shannon diversity.
-
-![Figure 8](figures/Figure8_alpha_QQplots.png)
-
----
-
-### Beta diversity and community structure
-
-**Figure 9 – Bray–Curtis PCoA by Cutotype**  
-PCoA ordination of Bray–Curtis dissimilarities with 95% ellipses.
-
-![Figure 9](figures/Figure9_PCoA_BrayCutotype.png)
-
-**Figure 10 – Jaccard PCoA by Cutotype**  
-PCoA ordination of binary Jaccard distances with 95% ellipses.
-
-![Figure 10](figures/Figure10_PCoA_JaccardCutotype.png)
-
----
-
-## Notes
-
-- The repository contains **processed tables only** (no raw sequencing data).
-- The project was completed as part of the **BIO211 Metagenomic Data Analysis** coursework at XJTLU.
-- Code is written for clarity and reproducibility, with comments marking each task (1–4) in the script.
+> **Academic-use note**  
+> This repository is a portfolio and reproducibility example. Do not submit its code, figures or interpretations as your own coursework.
